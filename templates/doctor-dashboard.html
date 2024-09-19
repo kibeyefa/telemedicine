@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Hugo 0.84.0">
+  <title>Patient Dashboard</title>
+
+  <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/dashboard/">
+  <script defer src="https://widget-js.cometchat.io/v3/cometchatwidget.js"></script>
+
+
+
+
+  <!-- Bootstrap core CSS -->
+  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
+
+
+  <!-- Custom styles for this template -->
+  <link href="/static/css/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+    <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">Dashboard</a>
+    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
+    <!-- <span class="w-100 bg-primary"></span> -->
+    <div class="navbar-nav">
+      <div class="nav-item text-nowrap ">
+        <a class="nav-link px-3 fw-bold text-decoration-underline" href="/auth/signout/">Sign out</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+        <div class="position-sticky pt-3">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/dashboard/doctor/">
+                <span data-feather="home"></span>
+                Dashboard
+              </a>
+            </li>
+        </div>
+      </nav>
+
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <div
+          class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h5">Welcome, {{doctor_profile.name}}</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <!-- <div class="btn-group me-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+                <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                <span data-feather="calendar"></span>
+                This week
+              </button> -->
+          </div>
+        </div>
+
+        <div>
+        {% for message in messages %}
+        <div class="my-2 alert alert-info alert-dismissible fade show" role="alert">
+          {{message}}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        </div>
+
+        <h6>Your Patients</h6>
+        <div class="row">
+          {% for patient in patients %}
+          <div class="col col-sm-6 col-md-4 col-lg-3">
+            <div class="card ">
+              <div class="d-flex p-1">
+                <img src="{{patient.image.url}}" class="img-fluid" alt=""
+                  style="height: 60px; width:60px; border-radius:5px; object-fit:cover">
+                <div class="ms-2">
+                  <h6 class="">{{patient.name}}</h6>
+                  <!-- <p>{{doctor.bio}}</p> -->
+                  <div>
+                    <button onclick="CometChatWidget.chatWithUser('{{patient.slug.lower}}')" class="btn btn-sm btn-secondary">Contact</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div>You have no patients yet.</div>
+          {% endfor %}
+        </div>
+
+        <hr class="mb-5">
+        <h6>Connection Requets</h6>
+        <div class="row">
+          {% for connection in connection_requests %}
+          <div class="col col-sm-6 col-md-4 col-lg-3">
+            <div class="card ">
+              <div class="d-flex p-1">
+                <img src="{{connection.patient.image.url}}" class="img-fluid" alt=""
+                  style="height: 60px; width:60px; border-radius:5px; object-fit:cover">
+                <div class="ms-2">
+                  <h6 class="">{{connection.patient.name}}</h6>
+                  <!-- <p>{{doctor.bio}}</p> -->
+                  <div>
+                    <a href="/connection/accept/{{connection.id}}/" class="btn btn-sm btn-primary">Accept</a>
+                    <a href="/connection/reject/{{connection.id}}/" class="btn btn-sm btn-danger">Reject</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+      CometChatWidget.init({
+        "appID": "263858aad3fc4c8b",
+        "appRegion": "us",
+        "authKey": "809aab094f604a4fc086ab44674f709a1b39d32c"
+      }).then(response => {
+        console.log("Initialization completed successfully");
+        //You can now call login function.
+        CometChatWidget.login({
+          "uid": "{{doctor_profile.slug.lower}}"
+        }).then(response => {
+          CometChatWidget.launch({
+            "widgetID": "62c2fa34-237f-44e2-a5f6-80d465e27a6e",
+            "docked": "true",
+            "alignment": "right", //left or right
+            "roundedCorners": "true",
+            "height": "450px",
+            "width": "400px",
+            //"defaultID": 'cometchat-uid-1', //default UID (user) or GUID (group) to show,
+            "defaultType": 'user' //user or group
+          });
+        }, error => {
+          console.log("User login failed with error:", error);
+          //Check the reason for error and take appropriate action.
+        });
+      }, error => {
+        console.log("Initialization failed with error:", error);
+        //Check the reason for error and take appropriate action.
+      });
+    });
+  </script>
+  <script src="/static/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
+<!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc ut tortor at ipsum commodo molestie. Duis egestas finibus
+sem, nec tempus ligula interdum sed. Aliquam viverra ut odio eget finibus. -->
